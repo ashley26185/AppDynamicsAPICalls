@@ -1,0 +1,54 @@
+queueManagerName = 'QueueManagerName'
+queueName = 'QueueNameString'
+tierName = 'TierName'
+thresholdValue = '2'
+
+import requests
+from requests.structures import CaseInsensitiveDict
+session = requests.Session()
+session.trust_env = False
+
+params = (
+    ('name', 'Template'),
+)
+
+headers = CaseInsensitiveDict()
+headers["Accept"] = "application/xml"
+
+response = session.get('http://CONTROLLERURL/controller/healthrules/AppName', params=params, auth=('username@account', 'PASSWORD'))
+
+import xml.etree.ElementTree as ET
+root = ET.fromstring(response.content)
+
+#Update Each health Rule
+for child in root:
+    #Update the Rule Name here
+    for name in child.iter('name'):
+        name.text = 'DASH-' + queueManagerName + '-' + queueName
+
+    #Update the Wait Time here
+    for waittimemin in child.iter('wait-time-min'):
+        waittimemin.text = '60'
+
+    #<display-name>QueueName</display-name>
+    for displayname in child.iter('display-name'):
+        displayname.text = queueName
+    
+    #<condition-value>5000.0</condition-value>
+    for conditionvalue in child.iter('condition-value'):
+        conditionvalue.text = thresholdValue
+    
+    #<logical-metric-name>Application Infrastructure Performance|ATMBroker|Custom Metrics|WMQ|QueueManagerName|Queues|QueueName|Current Queue Depth</logical-metric-name>
+    for logicalmetricname in child.iter('logical-metric-name'):
+        logicalmetricname.text = 'Application Infrastructure Performance|' + tierName + '|Custom Metrics|WMQ|' + queueManagerName + '|Queues|' + queueName + '|Current Queue Depth'
+    
+    #Update metric name
+    for metricname in child.iter('metric-name'):
+        metricname.text = 'Server|Component:554|Custom Metrics|WMQ|' + queueManagerName + '|Queues|' + queueName + '|Current Queue Depth'
+        
+
+# Send 
+files = {'file': ('healthrule.xml', ET.tostring(root))}
+
+response = session.post('http://CONTROLLERURL/controller/healthrules/AppName', files=files, auth=('username@account', 'PASSWORD'))
+response.content
