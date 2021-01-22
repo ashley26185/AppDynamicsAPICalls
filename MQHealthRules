@@ -38,7 +38,7 @@ for child in root:
     for conditionvalue in child.iter('condition-value'):
         conditionvalue.text = thresholdValue
     
-    #<logical-metric-name>Application Infrastructure Performance|ATMBroker|Custom Metrics|WMQ|QueueManagerName|Queues|QueueName|Current Queue Depth</logical-metric-name>
+    #<logical-metric-name>Application Infrastructure Performance|TierName|Custom Metrics|WMQ|QueueManagerName|Queues|QueueName|Current Queue Depth</logical-metric-name>
     for logicalmetricname in child.iter('logical-metric-name'):
         logicalmetricname.text = 'Application Infrastructure Performance|' + tierName + '|Custom Metrics|WMQ|' + queueManagerName + '|Queues|' + queueName + '|Current Queue Depth'
     
